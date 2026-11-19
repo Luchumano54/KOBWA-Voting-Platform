@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: apexrewards
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 3 --timeout 120 -b 0.0.0.0:$PORT wsgi:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apexrewards-db
+          property: connectionString
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: apexrewards-db
+    databaseName: apexrewards
+    user: apexrewards
+    plan: free
+

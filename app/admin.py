@@ -245,7 +245,7 @@ def _user_dict(u):
 def _users_query(db, where="", params=()):
     return db.execute(
         "SELECT u.*, (SELECT COUNT(*) FROM ballots b WHERE b.user_id = u.id) AS ballots_cast "
-        f"FROM users u {where} ORDER BY u.name COLLATE NOCASE", params).fetchall()
+        f"FROM users u {where} ORDER BY LOWER(u.name)", params).fetchall()
 
 
 @bp.get("/users")

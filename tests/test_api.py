@@ -265,6 +265,7 @@ def test_image_upload_is_validated_resized_and_served_only_to_signed_in_users(ap
     assert img.status_code == 200 and img.mimetype == "image/jpeg"
     from PIL import Image
     assert max(Image.open(io.BytesIO(img.data)).size) <= 900
+    img.close()
     assert Client(app).get(nominee["image_url"]).status_code == 401
     assert admin.get("/media/..%2f..%2fetc%2fpasswd").status_code == 404
     assert admin.delete(f"/api/admin/nominees/{nominee['id']}").status_code == 200

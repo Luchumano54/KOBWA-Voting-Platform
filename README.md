@@ -77,6 +77,19 @@ already received stay counted. Open-vote results list only people who received v
   administrators using the application, not against someone who can read the database *and*
   correlate server logs or timing.
 
+## Deploying to Render (PostgreSQL)
+
+ApexRewards supports PostgreSQL out of the box so you do not have to worry about persistent disks or ephemeral storage on Render.
+
+1. Push your repository to GitHub or GitLab.
+2. In [Render](https://render.com), create a new **Blueprint** and select your repository (it automatically detects [`render.yaml`](file:///c:/Users/Lenny/OneDrive%20-%20Komati%20Basin%20Water%20Authority/Desktop/apexrewards/render.yaml)).
+3. Render creates:
+   - A free **PostgreSQL database** (`apexrewards-db`).
+   - A **Web Service** running Gunicorn, automatically linked to `DATABASE_URL`.
+4. (Optional) Set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` in your environment variables to automatically initialize the first admin account on startup.
+
+The database schema and triggers are initialized automatically on first startup. When running locally without `DATABASE_URL`, the app continues to fall back to SQLite.
+
 ## Production
 
 Serve behind HTTPS (nginx, IIS ARR, a load balancer). Then set `COOKIE_SECURE=1` and, if proxied,

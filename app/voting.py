@@ -107,7 +107,7 @@ def compute_results(db):
         rows = db.execute(
             "SELECT n.id, n.name, n.image, COUNT(v.id) AS votes FROM nominees n "
             "LEFT JOIN votes v ON v.nominee_id = n.id WHERE n.category_id = ? "
-            "GROUP BY n.id ORDER BY votes DESC, n.name COLLATE NOCASE", (c["id"],)).fetchall()
+            "GROUP BY n.id ORDER BY votes DESC, LOWER(n.name)", (c["id"],)).fetchall()
         total = sum(r["votes"] for r in rows)
         ballots = db.execute("SELECT COUNT(*) n FROM ballots WHERE category_id = ?", (c["id"],)).fetchone()["n"]
         if c["mode"] == "directory":
@@ -127,6 +127,7 @@ def compute_results(db):
 
 
 @bp.get("/results")
+@auth()
 def results():
     db = get_db()
     public = results_public(db)

@@ -52,5 +52,5 @@ def delete_image(upload_dir, name):
     if name and NAME_RE.match(name):
         try:
             (Path(upload_dir) / name).unlink()
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             pass

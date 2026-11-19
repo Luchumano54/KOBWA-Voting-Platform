@@ -28,8 +28,14 @@ def _env_int(name, default):
 def create_app(test_config=None):
     app = Flask(__name__, instance_path=str(BASE_DIR / "instance"))
     env = os.environ.get
+    db_target = env("DATABASE_URL")
+    if db_target and db_target.startswith("postgres://"):
+        db_target = db_target.replace("postgres://", "postgresql://", 1)
+    if not db_target:
+        db_target = env("DATABASE_PATH", str(Path(app.instance_path) / "apexrewards.db"))
+
     app.config.update(
-        DATABASE=env("DATABASE_PATH", str(Path(app.instance_path) / "apexrewards.db")),
+        DATABASE=db_target,
         UPLOAD_DIR=env("UPLOAD_DIR", str(BASE_DIR / "uploads")),
         SESSION_HOURS=_env_int("SESSION_HOURS", 8),
         MAX_IMAGE_MB=_env_int("MAX_IMAGE_MB", 5),
@@ -48,7 +54,8 @@ def create_app(test_config=None):
     if app.config["TRUST_PROXY"]:
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
-    Path(app.config["DATABASE"]).parent.mkdir(parents=True, exist_ok=True)
+    if not dbm.is_postgres(app.config["DATABASE"]):
+        Path(app.config["DATABASE"]).parent.mkdir(parents=True, exist_ok=True)
     Path(app.config["UPLOAD_DIR"]).mkdir(parents=True, exist_ok=True)
 
     app.teardown_appcontext(dbm.close_db)
@@ -78,7 +85,7 @@ def create_app(test_config=None):
 
     @app.get("/media/<name>")
     def media(name):
-        if g.user is None and not voting.results_public(dbm.get_db()):
+        if g.user is None:
             raise ApiError(401, "Please sign in.")
         if not NAME_RE.match(name):
             raise NotFound()

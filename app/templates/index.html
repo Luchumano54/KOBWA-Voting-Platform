@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>KOBWA VOTING PLATFORM</title>
+  <link rel="icon" type="image/png" href="/static/img/kobwa-logo.png?v=8">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=8">
+  <link rel="shortcut icon" href="/favicon.ico?v=8">
+  <link rel="apple-touch-icon" href="/static/img/kobwa-logo.png?v=8">
+  <link rel="stylesheet" href="/static/css/app.css?v=8">
+  <script src="/static/vendor/lucide.min.js" defer></script>
+  <script src="/static/vendor/confetti.browser.js" defer></script>
+  <script src="/static/js/app.js?v=8" defer></script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+  <!-- Startup placeholder -->
+  <div id="screen-boot" class="flex-1 flex items-center justify-center text-sm text-slate-400" role="status">Loading…</div>
+
+  <!-- Sign in -->
+  <section id="screen-login" class="hidden flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+      <div class="flex flex-col items-center mb-8 justify-center text-center">
+        <div class="h-20 w-20 rounded-2xl bg-white p-2 flex items-center justify-center shadow-xl shadow-sky-500/10 border border-slate-200/20 mb-3">
+          <img src="/static/img/kobwa-logo.png" alt="KOBWA Logo" class="h-full w-full object-contain">
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white leading-tight">KOBWA VOTING PLATFORM</h1>
+          <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Komati Basin Water Authority</p>
+        </div>
+      </div>
+      <form id="login-form" class="glass-panel rounded-2xl p-6 space-y-4">
+        <div>
+          <h2 class="text-lg font-bold text-white">Sign in to vote</h2>
+          <p class="text-sm text-slate-400 mt-1">Use the email address your administrator registered for you.</p>
+        </div>
+        <div>
+          <label for="login-email" class="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+          <input id="login-email" type="email" autocomplete="username" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label for="login-password" class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+        <p id="login-error" class="hidden text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2" role="alert"></p>
+        <button id="login-submit" type="submit" class="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold transition shadow-lg shadow-brand-600/20 disabled:opacity-60">Sign in</button>
+      </form>
+      <div class="mt-4 text-center">
+        <button id="btn-login-bigscreen" type="button" class="inline-flex items-center space-x-2 text-xs font-semibold text-slate-300 hover:text-white transition py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 shadow">
+          <i data-lucide="tv" class="w-4 h-4 text-sky-400"></i>
+          <span>Follow proceedings on Big Screen</span>
+        </button>
+      </div>
+      <p class="text-center text-xs text-slate-500 mt-6">&copy; Komati Basin Water Authority. All rights reserved.</p>
+    </div>
+  </section>
+
+  <!-- Forced password change (temporary password) -->
+  <section id="screen-password" class="hidden flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+      <div class="flex items-center space-x-3 mb-6 justify-center">
+        <div class="h-12 w-12 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-lg border border-slate-200/20 flex-shrink-0">
+          <img src="/static/img/kobwa-logo.png" alt="KOBWA Logo" class="h-full w-full object-contain">
+        </div>
+        <div>
+          <p class="text-lg font-bold text-white leading-none">KOBWA VOTING PLATFORM</p>
+          <p class="text-xs text-slate-400 mt-1">Komati Basin Water Authority</p>
+        </div>
+      </div>
+      <div id="forced-password-card" class="glass-panel rounded-2xl p-6"></div>
+      <button id="forced-signout" type="button" class="mt-4 w-full text-xs text-slate-400 hover:text-slate-200 transition">Sign out</button>
+    </div>
+  </section>
+
+  <!-- Application shell -->
+  <div id="app" class="hidden flex-1 flex flex-col min-h-0">
+    <header class="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 lg:px-8 py-3 flex items-center justify-between shadow-lg">
+      <div class="flex items-center space-x-3">
+        <div class="h-10 w-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-lg shadow-sky-500/10 border border-slate-200/20 flex-shrink-0">
+          <img src="/static/img/kobwa-logo.png" alt="KOBWA Logo" class="h-full w-full object-contain">
+        </div>
+        <div>
+          <p class="text-base sm:text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent leading-none">KOBWA VOTING PLATFORM</p>
+          <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Komati Basin Water Authority</p>
+        </div>
+      </div>
+
+      <nav id="nav-desktop" class="hidden md:flex items-center space-x-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800" aria-label="Main"></nav>
+
+      <div class="flex items-center space-x-1">
+        <button id="btn-header-bigscreen" type="button" title="Big Screen Presentation Mode" aria-label="Big Screen Presentation Mode" class="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-sky-600/20 transition mr-2">
+          <i data-lucide="tv" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Big Screen</span>
+        </button>
+        <div class="text-right mr-2 hidden sm:block leading-tight">
+          <p id="user-name" class="text-sm font-semibold text-white"></p>
+          <p id="user-role" class="text-[11px] text-slate-400"></p>
+        </div>
+        <button id="btn-change-password" type="button" title="Change password" aria-label="Change password" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"><i data-lucide="key-round" class="w-4 h-4"></i></button>
+        <button id="btn-signout" type="button" title="Sign out" aria-label="Sign out" class="p-2 text-slate-400 hover:text-red-300 hover:bg-slate-800 rounded-lg transition"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+      </div>
+    </header>
+
+    <nav id="nav-mobile" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-800 flex justify-around p-2 backdrop-blur-md" aria-label="Main"></nav>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+      <section id="view-voter" class="hidden space-y-8"></section>
+      <section id="view-results" class="hidden space-y-8"></section>
+      <section id="view-admin" class="hidden space-y-8"></section>
+    </main>
+
+    <footer class="mt-auto border-t border-slate-800/80 py-4 px-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+      <img src="/static/img/kobwa-logo.png" alt="KOBWA" class="h-4 w-auto opacity-70">
+      <span>KOBWA VOTING PLATFORM &bull; Komati Basin Water Authority</span>
+    </footer>
+  </div>
+
+  <!-- Big Screen Presentation Stage for Audience / Projector -->
+  <section id="screen-bigscreen" class="hidden fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col overflow-y-auto overflow-x-hidden selection:bg-brand-500 selection:text-white">
+  </section>
+
+  <div id="modal-root"></div>
+  <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center space-y-2 pointer-events-none w-max max-w-[calc(100vw-2rem)]" role="status" aria-live="polite"></div>
+</body>
+</html>

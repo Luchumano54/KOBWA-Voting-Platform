@@ -1,0 +1,15 @@
+services:
+  apexrewards:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"   # put an HTTPS reverse proxy in front of this
+    environment:
+      COOKIE_SECURE: "1"        # requires HTTPS at the proxy
+      TRUST_PROXY: "1"
+      BOOTSTRAP_ADMIN_EMAIL: "${BOOTSTRAP_ADMIN_EMAIL:-}"
+      BOOTSTRAP_ADMIN_PASSWORD: "${BOOTSTRAP_ADMIN_PASSWORD:-}"
+    volumes:
+      - apex-data:/data         # database + nominee photos: back this up
+    restart: unless-stopped
+volumes:
+  apex-data:

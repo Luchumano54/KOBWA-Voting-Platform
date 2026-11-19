@@ -194,6 +194,8 @@
     state.user = null; state.categories = []; state.results = null; state.resultsKey = '';
     state.selection.clear(); state.peopleQuery = ''; state.view = 'voter'; state.voterCat = null; state.resultsCat = null;
     state.bigScreen.active = false;
+    const btnHeaderBig = $('#btn-header-bigscreen');
+    if (btnHeaderBig) { btnHeaderBig.classList.add('hidden'); btnHeaderBig.classList.remove('flex'); }
     Object.assign(state.admin, { tab: 'categories', categories: [], users: [], verify: null, userFilter: '' });
     Object.assign(state.admin.audit, { items: [], total: 0, page: 1, q: '' });
   }
@@ -273,6 +275,16 @@
     await loadBootstrap();
     $('#user-name').textContent = state.user.name;
     $('#user-role').textContent = state.user.role === 'admin' ? 'Administrator' : 'Voter';
+    const btnHeaderBig = $('#btn-header-bigscreen');
+    if (btnHeaderBig) {
+      if (state.user.role === 'admin') {
+        btnHeaderBig.classList.remove('hidden');
+        btnHeaderBig.classList.add('flex');
+      } else {
+        btnHeaderBig.classList.add('hidden');
+        btnHeaderBig.classList.remove('flex');
+      }
+    }
     showScreen('app');
     await switchView('voter');
   }
@@ -557,10 +569,10 @@
       h('div', null,
         h('div', { class: 'flex items-center space-x-2' }, icon('bar-chart-3', 'w-6 h-6 text-brand-500'), h('h2', { class: 'text-2xl font-bold text-white' }, 'Live results')),
         h('p', { class: 'text-sm text-slate-400 mt-1' }, 'The leaderboard refreshes automatically as votes are cast.')),
-      h('div', { class: 'flex items-center space-x-3' },
+      isAdmin && h('div', { class: 'flex items-center space-x-3' },
         h('button', { type: 'button', on: { click: enterBigScreen }, class: 'flex items-center space-x-2 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-sky-600/20 transition duration-200 text-sm', title: 'Launch presentation screen for big displays and projectors' }, icon('tv'), h('span', null, 'Big Screen Mode')),
         shown && h('button', { type: 'button', on: { click: celebrate }, class: 'flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-orange-500/20 transition duration-200' }, icon('sparkles'), h('span', null, 'Celebrate winners')),
-        isAdmin && h('button', { type: 'button', on: { click: () => setResultsPublic(!data.public) }, class: 'flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-medium transition' },
+        h('button', { type: 'button', on: { click: () => setResultsPublic(!data.public) }, class: 'flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-medium transition' },
           icon(data.public ? 'eye-off' : 'eye'), h('span', null, data.public ? 'Hide results from voters' : 'Publish results')))));
 
     if (!shown) {
@@ -705,6 +717,12 @@
   }
 
   async function enterBigScreen() {
+    if (!state.user || state.user.role !== 'admin') {
+      toast('Administrator access required for Big Screen presentation mode.', 'error');
+      if (state.user) switchView('results');
+      else showScreen('login');
+      return;
+    }
     state.bigScreen.active = true;
     state.bigScreen.previousView = state.view || 'results';
     state.bigScreen.countdownSec = state.bigScreen.rotateIntervalSec;
@@ -1544,8 +1562,6 @@
     // Big Screen Event Listeners
     const btnHeaderBig = $('#btn-header-bigscreen');
     if (btnHeaderBig) btnHeaderBig.addEventListener('click', enterBigScreen);
-    const btnLoginBig = $('#btn-login-bigscreen');
-    if (btnLoginBig) btnLoginBig.addEventListener('click', enterBigScreen);
 
     window.addEventListener('keydown', (e) => {
       if (!state.bigScreen.active) return;
@@ -1589,7 +1605,11 @@
 
     window.addEventListener('hashchange', () => {
       if ((location.hash === '#bigscreen' || location.hash === '#screen') && !state.bigScreen.active) {
-        enterBigScreen();
+        if (state.user && state.user.role === 'admin') {
+          enterBigScreen();
+        } else {
+          location.hash = '';
+        }
       } else if (state.bigScreen.active && location.hash !== '#bigscreen' && location.hash !== '#screen') {
         exitBigScreen();
       }
@@ -1597,21 +1617,25 @@
 
     api('/api/auth/me')
       .then(({ user }) => {
-        if (location.hash === '#bigscreen' || location.hash === '#screen') {
-          if (user) state.user = user;
-          enterBigScreen();
-        } else if (user) {
-          afterSignIn(user);
+        if (user) {
+          state.user = user;
+          if ((location.hash === '#bigscreen' || location.hash === '#screen') && user.role === 'admin') {
+            enterBigScreen();
+          } else {
+            afterSignIn(user);
+          }
         } else {
+          if (location.hash === '#bigscreen' || location.hash === '#screen') {
+            location.hash = '';
+          }
           showScreen('login');
         }
       })
       .catch(() => {
         if (location.hash === '#bigscreen' || location.hash === '#screen') {
-          enterBigScreen();
-        } else {
-          showScreen('login');
+          location.hash = '';
         }
+        showScreen('login');
       });
   }
   init();
